@@ -11,10 +11,8 @@ export function encryptPassword(password) {
     return password
   }
   const key = CryptoJS.enc.Utf8.parse(AES_KEY.padEnd(16, '0').slice(0, 16))
-  const iv = CryptoJS.enc.Utf8.parse(AES_KEY.padEnd(16, '0').slice(0, 16))
   return CryptoJS.AES.encrypt(password, key, {
-    iv,
-    mode: CryptoJS.mode.CBC,
+    mode: CryptoJS.mode.ECB,
     padding: CryptoJS.pad.Pkcs7
   }).toString()
 }
