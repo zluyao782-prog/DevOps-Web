@@ -12,11 +12,12 @@ export const useAuthStore = defineStore('auth', {
   },
   actions: {
     async login(username, password) {
+      console.log('auth.login 调用, 加密后密码:', password)
       const resp = await apiLogin({ username, password: encryptPassword(password) })
+      console.log('登录接口响应:', resp)
       this.token = resp.accessToken
       localStorage.setItem('token', resp.accessToken)
       if (resp.refreshToken) localStorage.setItem('refreshToken', resp.refreshToken)
-      // 登录后立即获取用户信息
       await this.fetchUser()
     },
     async fetchUser() {

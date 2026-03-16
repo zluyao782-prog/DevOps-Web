@@ -6,8 +6,10 @@ import CryptoJS from 'crypto-js'
 const AES_KEY = import.meta.env.VITE_AES_KEY || ''
 
 export function encryptPassword(password) {
-  // 使用 AES-128-CBC，key 和 IV 均取密钥字符串的前16字节
-  // 与后端 Go/Java 标准 AES 解密方式对齐
+  if (!AES_KEY) {
+    console.warn('VITE_AES_KEY 未配置，密码将明文传输')
+    return password
+  }
   const key = CryptoJS.enc.Utf8.parse(AES_KEY.padEnd(16, '0').slice(0, 16))
   const iv = CryptoJS.enc.Utf8.parse(AES_KEY.padEnd(16, '0').slice(0, 16))
   return CryptoJS.AES.encrypt(password, key, {

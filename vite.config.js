@@ -19,23 +19,12 @@ export default defineConfig(({ mode }) => {
       }
     },
     server: {
-      proxy: {
-        // 统一代理所有 API 请求到后端服务
-        '/api': apiBase,
-        '/login': apiBase,
-        '/logout': apiBase,
-        '/user': apiBase,
-        '/product': apiBase,
-        '/version': apiBase,
-        '/artifact_repository': apiBase,
-        '/artifact_category': apiBase,
-        '/githubbranchs': apiBase,
-        '/githubworkflows': apiBase,
-        '/triggerworkflow': apiBase,
-        '/user_info': apiBase,
-        '/check_token': apiBase,
-        '/token': apiBase
-      }
+      proxy: Object.fromEntries(
+        ['/api', '/login', '/logout', '/user', '/product', '/version',
+          '/artifact_repository', '/artifact_category', '/githubbranchs',
+          '/githubworkflows', '/triggerworkflow', '/user_info', '/check_token', '/token'
+        ].map(path => [path, { target: apiBase, changeOrigin: true }])
+      )
     }
   }
 })
