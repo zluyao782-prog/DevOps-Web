@@ -12,12 +12,16 @@ export const useAuthStore = defineStore('auth', {
   },
   actions: {
     async login(username, password) {
-      console.log('auth.login 调用, 加密后密码:', password)
       const resp = await apiLogin({ username, password: encryptPassword(password) })
-      console.log('登录接口响应:', resp)
-      this.token = resp.accessToken
-      localStorage.setItem('token', resp.accessToken)
-      if (resp.refreshToken) localStorage.setItem('refreshToken', resp.refreshToken)
+      console.log('登录接口响应:', JSON.stringify(resp))
+      // 兼容不同字段名：accessToken / token / access_token
+      const token = resp?.accessToken || resp?.token || resp?.access_token || resp
+      if (!token || typeof token !== 'string') {
+        throw new Error('登录响应中未找到 token，响应内容: ' + JSON.stringify(resp))
+      }
+      this.token = token
+      localStorage.setItem('token', token)
+      if (resp?.refreshToken) localStorage.setItem('refreshToken', resp.refreshToken)
       await this.fetchUser()
     },
     async fetchUser() {
