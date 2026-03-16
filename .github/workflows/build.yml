@@ -48,6 +48,17 @@ jobs:
           name: dist
           path: dist/
 
+      - name: Prepare deploy directory
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          password: ${{ secrets.DEPLOY_PASSWORD }}
+          port: 22
+          script: |
+            mkdir -p ${{ secrets.DEPLOY_PATH }}
+            chmod 755 ${{ secrets.DEPLOY_PATH }}
+
       - name: Deploy to server
         uses: appleboy/scp-action@v0.1.7
         with:
