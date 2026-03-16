@@ -34,7 +34,12 @@ const rules = {
 }
 
 async function handleLogin() {
-  await formRef.value.validate()
+  try {
+    await formRef.value.validate()
+  } catch {
+    // 表单验证不通过，不继续
+    return
+  }
   loading.value = true
   try {
     await auth.login(form.value.username, form.value.password)
