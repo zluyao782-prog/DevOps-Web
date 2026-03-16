@@ -1,7 +1,7 @@
 <template>
   <el-card>
     <template #header>
-      <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="card-header">
         <span>产品管理</span>
         <el-button type="primary" @click="openDialog()">新增产品</el-button>
       </div>
@@ -28,12 +28,8 @@
 
     <el-dialog v-model="dialogVisible" :title="form.id ? '编辑产品' : '新增产品'" width="500px">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="80px">
-        <el-form-item label="名称" prop="name">
-          <el-input v-model="form.name" />
-        </el-form-item>
-        <el-form-item label="中文名" prop="nameZh">
-          <el-input v-model="form.nameZh" />
-        </el-form-item>
+        <el-form-item label="名称" prop="name"><el-input v-model="form.name" /></el-form-item>
+        <el-form-item label="中文名" prop="nameZh"><el-input v-model="form.nameZh" /></el-form-item>
         <el-form-item label="描述">
           <el-input v-model="form.description" type="textarea" :rows="3" />
         </el-form-item>
@@ -41,9 +37,7 @@
           <el-switch v-model="form.needShow" />
         </el-form-item>
         <el-form-item label="成员">
-          <el-select v-model="form.members" multiple filterable allow-create default-first-option placeholder="输入成员后回车" style="width:100%">
-            <el-option v-for="m in form.members" :key="m" :label="m" :value="m" />
-          </el-select>
+          <el-select v-model="form.members" multiple filterable allow-create style="width:100%" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -55,53 +49,26 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { onMounted } from 'vue'
+import { useCRUD } from '../composables/useCRUD'
 import { getProducts, createProduct, updateProduct, deleteProduct } from '../api'
 
-const list = ref([])
-const loading = ref(false)
-const saving = ref(false)
-const dialogVisible = ref(false)
-const formRef = ref()
-const form = ref({})
 const rules = {
   name: [{ required: true, message: '请输入名称' }],
   nameZh: [{ required: true, message: '请输入中文名' }]
 }
 
-async function load() {
-  loading.value = true
-  try {
-    const res = await getProducts()
-    list.value = res?.data || res || []
-  } finally { loading.value = false }
-}
-
-function openDialog(row) {
-  form.value = row ? { ...row, members: [...(row.members || [])] } : { needShow: true, members: [] }
-  dialogVisible.value = true
-  formRef.value?.resetFields()
-}
-
-async function handleSave() {
-  await formRef.value.validate()
-  saving.value = true
-  try {
-    if (form.value.id) await updateProduct(form.value)
-    else await createProduct(form.value)
-    ElMessage.success('保存成功')
-    dialogVisible.value = false
-    load()
-  } finally { saving.value = false }
-}
-
-async function handleDelete(row) {
-  await ElMessageBox.confirm(`确认删除产品 "${row.name}"？`, '提示', { type: 'warning' })
-  await deleteProduct(row.id)
-  ElMessage.success('删除成功')
-  load()
-}
+const { list, loading, saving, dialogVisible, formRef, form, load, openDialog, handleSave, handleDelete } = useCRUD({
+  fetchFn: getProducts,
+  createFn: createProduct,
+  updateFn: updateProduct,
+  deleteFn: deleteProduct,
+  defaultForm: { needShow: true, members: [] }
+})
 
 onMounted(load)
 </script>
+
+<style scoped>
+.card-header { display: flex; justify-content: space-between; align-items: center; }
+</style>

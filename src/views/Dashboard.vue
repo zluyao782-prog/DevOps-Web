@@ -1,11 +1,11 @@
 <template>
   <div>
-    <h3 style="margin-bottom:16px">仪表盘</h3>
+    <h3 class="page-title">仪表盘</h3>
     <el-row :gutter="16">
       <el-col :span="6" v-for="item in stats" :key="item.label">
-        <el-card shadow="hover" style="text-align:center">
-          <div style="font-size:32px;font-weight:bold;color:#409eff">{{ item.value }}</div>
-          <div style="color:#666;margin-top:8px">{{ item.label }}</div>
+        <el-card shadow="hover" class="stat-card">
+          <div class="stat-value">{{ item.value }}</div>
+          <div class="stat-label">{{ item.label }}</div>
         </el-card>
       </el-col>
     </el-row>
@@ -30,22 +30,36 @@ const stats = ref([
   { label: '系统状态', value: '正常' }
 ])
 
+async function safeCount(fn) {
+  try {
+    const res = await fn()
+    return Array.isArray(res) ? res.length : (res?.data || res || []).length
+  } catch {
+    return 0
+  }
+}
+
 onMounted(async () => {
   try {
-    const res = await getSystemInfo()
-    sysInfo.value = res?.data || res
-  } catch {}
-  try {
-    const res = await getProducts()
-    stats.value[0].value = (res?.data || res || []).length
-  } catch {}
-  try {
-    const res = await getUsers()
-    stats.value[1].value = (res?.data || res || []).length
-  } catch {}
-  try {
-    const res = await getRepositories()
-    stats.value[2].value = (res?.data || res || []).length
-  } catch {}
+    sysInfo.value = await getSystemInfo()
+  } catch (e) {
+    console.warn('获取系统信息失败', e)
+  }
+
+  const [productCount, userCount, repoCount] = await Promise.all([
+    safeCount(getProducts),
+    safeCount(getUsers),
+    safeCount(getRepositories)
+  ])
+  stats.value[0].value = productCount
+  stats.value[1].value = userCount
+  stats.value[2].value = repoCount
 })
 </script>
+
+<style scoped>
+.page-title { margin-bottom: 16px; }
+.stat-card { text-align: center; }
+.stat-value { font-size: 32px; font-weight: bold; color: #409eff; }
+.stat-label { color: #666; margin-top: 8px; }
+</style>

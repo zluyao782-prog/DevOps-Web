@@ -1,7 +1,7 @@
 <template>
   <el-card>
     <template #header>
-      <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="card-header">
         <span>用户管理</span>
         <el-button type="primary" @click="openDialog()">新增用户</el-button>
       </div>
@@ -26,7 +26,7 @@
     <el-dialog v-model="dialogVisible" :title="form.username ? '编辑用户' : '新增用户'" width="480px">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="80px">
         <el-form-item label="用户名" prop="username">
-          <el-input v-model="form.username" :disabled="!!editMode" />
+          <el-input v-model="form.username" :disabled="editMode" />
         </el-form-item>
         <el-form-item label="密码" :prop="editMode ? '' : 'password'">
           <el-input v-model="form.password" type="password" show-password :placeholder="editMode ? '不修改请留空' : ''" />
@@ -48,63 +48,34 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { getUsers, createUser, updateUser, deleteUser, encryptPassword } from '../api'
+import { computed, onMounted } from 'vue'
+import { useCRUD } from '../composables/useCRUD'
+import { getUsers, createUser, updateUser, deleteUser } from '../api'
 
-const list = ref([])
-const loading = ref(false)
-const saving = ref(false)
-const dialogVisible = ref(false)
-const editMode = ref(false)
-const formRef = ref()
-const form = ref({})
+const AUTH_LABELS = { admin: '管理员', user: '普通用户', guest: '访客' }
+const authTypeLabel = type => AUTH_LABELS[type] || type
+
 const rules = {
   username: [{ required: true, message: '请输入用户名' }],
   password: [{ required: true, message: '请输入密码' }],
   authType: [{ required: true, message: '请选择权限' }]
 }
 
-function authTypeLabel(t) {
-  return { admin: '管理员', user: '普通用户', guest: '访客' }[t] || t
-}
+const { list, loading, saving, dialogVisible, formRef, form, load, openDialog, handleSave, handleDelete } = useCRUD({
+  fetchFn: getUsers,
+  createFn: createUser,
+  updateFn: updateUser,
+  deleteFn: deleteUser,
+  getDeleteId: row => row.username,
+  getDeleteLabel: row => row.username,
+  defaultForm: { authType: 'user' }
+})
 
-async function load() {
-  loading.value = true
-  try {
-    const res = await getUsers()
-    list.value = res?.data || res || []
-  } finally { loading.value = false }
-}
-
-function openDialog(row) {
-  editMode.value = !!row
-  form.value = row ? { ...row, password: '' } : { authType: 'user' }
-  dialogVisible.value = true
-  formRef.value?.resetFields()
-}
-
-async function handleSave() {
-  await formRef.value.validate()
-  saving.value = true
-  try {
-    const payload = { ...form.value }
-    if (payload.password) payload.password = encryptPassword(payload.password)
-    else delete payload.password
-    if (editMode.value) await updateUser(payload)
-    else await createUser(payload)
-    ElMessage.success('保存成功')
-    dialogVisible.value = false
-    load()
-  } finally { saving.value = false }
-}
-
-async function handleDelete(row) {
-  await ElMessageBox.confirm(`确认删除用户 "${row.username}"？`, '提示', { type: 'warning' })
-  await deleteUser(row.username)
-  ElMessage.success('删除成功')
-  load()
-}
+const editMode = computed(() => !!form.value.username && list.value.some(u => u.username === form.value.username))
 
 onMounted(load)
 </script>
+
+<style scoped>
+.card-header { display: flex; justify-content: space-between; align-items: center; }
+</style>

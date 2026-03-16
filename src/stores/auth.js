@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { login as apiLogin, logout as apiLogout, encryptPassword } from '../api'
+import { login as apiLogin, logout as apiLogout, getUserInfo, encryptPassword } from '../api'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -7,7 +7,8 @@ export const useAuthStore = defineStore('auth', {
     user: null
   }),
   getters: {
-    isLoggedIn: state => !!state.token
+    isLoggedIn: state => !!state.token,
+    username: state => state.user?.username || ''
   },
   actions: {
     async login(username, password) {
@@ -15,6 +16,15 @@ export const useAuthStore = defineStore('auth', {
       this.token = resp.accessToken
       localStorage.setItem('token', resp.accessToken)
       if (resp.refreshToken) localStorage.setItem('refreshToken', resp.refreshToken)
+      // 登录后立即获取用户信息
+      await this.fetchUser()
+    },
+    async fetchUser() {
+      try {
+        this.user = await getUserInfo()
+      } catch (e) {
+        console.warn('获取用户信息失败', e)
+      }
     },
     async logout() {
       try { await apiLogout() } catch {}

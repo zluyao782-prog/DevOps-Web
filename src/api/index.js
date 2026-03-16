@@ -2,7 +2,8 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import CryptoJS from 'crypto-js'
 
-const AES_KEY = 'devops-aes-secret-key-2024'
+// 从环境变量读取密钥，避免硬编码
+const AES_KEY = import.meta.env.VITE_AES_KEY || ''
 
 export function encryptPassword(password) {
   return CryptoJS.AES.encrypt(password, AES_KEY).toString()
@@ -27,7 +28,8 @@ request.interceptors.response.use(
       }
       return Promise.reject(data)
     }
-    return data.resp
+    // 统一返回 resp 字段，兼容直接返回数组/对象的情况
+    return data.resp ?? data
   },
   err => {
     if (err.response?.status === 401) {

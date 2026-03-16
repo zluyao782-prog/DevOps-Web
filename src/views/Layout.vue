@@ -24,7 +24,7 @@
       <el-header style="background:#fff;display:flex;align-items:center;justify-content:flex-end;border-bottom:1px solid #e8e8e8">
         <el-dropdown @command="handleCommand">
           <span style="cursor:pointer;display:flex;align-items:center;gap:6px">
-            <el-icon><UserFilled /></el-icon> 管理员
+            <el-icon><UserFilled /></el-icon> {{ auth.username || '用户' }}
             <el-icon><ArrowDown /></el-icon>
           </span>
           <template #dropdown>
@@ -47,6 +47,9 @@ import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
 const auth = useAuthStore()
+
+// 如果已登录但没有用户信息，尝试获取
+if (auth.isLoggedIn && !auth.user) auth.fetchUser()
 
 async function handleCommand(cmd) {
   if (cmd === 'logout') {
