@@ -88,7 +88,10 @@ function openVersionDialog(row) {
 onMounted(async () => {
   try {
     const res = await getProducts()
-    products.value = Array.isArray(res) ? res : (res?.data || res || [])
+    products.value = Array.isArray(res) ? res
+      : Array.isArray(res?.data) ? res.data
+      : Array.isArray(res?.list) ? res.list
+      : []
     if (products.value.length) {
       selectedProduct.value = products.value[0].id
       load()

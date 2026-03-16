@@ -33,7 +33,11 @@ const stats = ref([
 async function safeCount(fn) {
   try {
     const res = await fn()
-    return Array.isArray(res) ? res.length : (res?.data || res || []).length
+    const arr = Array.isArray(res) ? res
+      : Array.isArray(res?.data) ? res.data
+      : Array.isArray(res?.list) ? res.list
+      : []
+    return arr.length
   } catch {
     return 0
   }

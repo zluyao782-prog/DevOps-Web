@@ -6,7 +6,15 @@ import CryptoJS from 'crypto-js'
 const AES_KEY = import.meta.env.VITE_AES_KEY || ''
 
 export function encryptPassword(password) {
-  return CryptoJS.AES.encrypt(password, AES_KEY).toString()
+  // 使用 AES-128-CBC，key 和 IV 均取密钥字符串的前16字节
+  // 与后端 Go/Java 标准 AES 解密方式对齐
+  const key = CryptoJS.enc.Utf8.parse(AES_KEY.padEnd(16, '0').slice(0, 16))
+  const iv = CryptoJS.enc.Utf8.parse(AES_KEY.padEnd(16, '0').slice(0, 16))
+  return CryptoJS.AES.encrypt(password, key, {
+    iv,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7
+  }).toString()
 }
 
 const request = axios.create({ timeout: 15000 })
@@ -17,26 +25,34 @@ request.interceptors.request.use(config => {
   return config
 })
 
+// token 过期或无效需要跳转登录的 errCode 集合
+const AUTH_ERROR_CODES = new Set([401, 403, 101002])
+
+function redirectToLogin() {
+  localStorage.removeItem('token')
+  localStorage.removeItem('refreshToken')
+  window.location.href = '/login'
+}
+
 request.interceptors.response.use(
   res => {
     const data = res.data
     if (data.errCode !== 0) {
-      ElMessage.error(data.errMsg || '请求失败')
-      if (data.errCode === 401 || data.errCode === 403) {
-        localStorage.removeItem('token')
-        window.location.href = '/login'
+      if (AUTH_ERROR_CODES.has(data.errCode)) {
+        redirectToLogin()
+      } else {
+        ElMessage.error(data.errMsg || '请求失败')
       }
       return Promise.reject(data)
     }
-    // 统一返回 resp 字段，兼容直接返回数组/对象的情况
     return data.resp ?? data
   },
   err => {
     if (err.response?.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
+      redirectToLogin()
+    } else {
+      ElMessage.error(err.response?.data?.errMsg || '网络错误')
     }
-    ElMessage.error(err.response?.data?.errMsg || '网络错误')
     return Promise.reject(err)
   }
 )

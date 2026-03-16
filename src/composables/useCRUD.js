@@ -24,9 +24,16 @@ export function useCRUD({ fetchFn, createFn, updateFn, deleteFn, getDeleteId, ge
     loading.value = true
     try {
       const res = await fetchFn(params)
-      list.value = Array.isArray(res) ? res : (res?.data || res || [])
+      // 依次尝试常见的数组字段，最终兜底为空数组
+      const data = Array.isArray(res) ? res
+        : Array.isArray(res?.data) ? res.data
+        : Array.isArray(res?.list) ? res.list
+        : Array.isArray(res?.items) ? res.items
+        : []
+      list.value = data
     } catch (e) {
       console.error('加载数据失败', e)
+      list.value = []
     } finally {
       loading.value = false
     }
