@@ -37,15 +37,17 @@ async function handleLogin() {
   try {
     await formRef.value.validate()
   } catch {
-    // 表单验证不通过，不继续
     return
   }
   loading.value = true
   try {
+    console.log('开始登录, username:', form.value.username)
     await auth.login(form.value.username, form.value.password)
+    console.log('登录成功, token:', localStorage.getItem('token'))
     router.push('/')
-  } catch {
-    ElMessage.error('登录失败，请检查用户名和密码')
+  } catch (e) {
+    console.error('登录失败详情:', e)
+    ElMessage.error(e?.errMsg || '登录失败，请检查用户名和密码')
   } finally {
     loading.value = false
   }
