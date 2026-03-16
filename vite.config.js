@@ -7,6 +7,17 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [vue()],
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-vue': ['vue', 'vue-router', 'pinia'],
+            'vendor-element': ['element-plus', '@element-plus/icons-vue'],
+            'vendor-utils': ['axios', 'crypto-js']
+          }
+        }
+      }
+    },
     server: {
       proxy: {
         // 统一代理所有 API 请求到后端服务
