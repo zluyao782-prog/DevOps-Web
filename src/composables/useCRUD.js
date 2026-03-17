@@ -24,13 +24,13 @@ export function useCRUD({ fetchFn, createFn, updateFn, deleteFn, getDeleteId, ge
     loading.value = true
     try {
       const res = await fetchFn(params)
+      console.log('[useCRUD] 原始响应:', JSON.stringify(res))
       // 依次尝试常见的数组字段，最终兜底为空数组
       const data = Array.isArray(res) ? res
         : Array.isArray(res?.data) ? res.data
         : Array.isArray(res?.list) ? res.list
         : Array.isArray(res?.items) ? res.items
         : []
-      if (data.length > 0) console.log('[useCRUD] 数据样本:', JSON.stringify(data[0]))
       list.value = data
     } catch (e) {
       console.error('加载数据失败', e)

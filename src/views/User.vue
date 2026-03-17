@@ -7,10 +7,10 @@
       </div>
     </template>
     <el-table :data="list" v-loading="loading" border>
-      <el-table-column prop="username" label="用户名" />
-      <el-table-column prop="authType" label="权限" width="100">
+      <el-table-column prop="userName" label="用户名" />
+      <el-table-column prop="authType" label="权限" width="120">
         <template #default="{ row }">
-          <el-tag :type="row.authType === 'admin' ? 'danger' : row.authType === 'user' ? 'primary' : 'info'">
+          <el-tag :type="row.authType === 'superadmin' ? 'danger' : row.authType === 'admin' ? 'warning' : row.authType === 'user' ? 'primary' : 'info'">
             {{ authTypeLabel(row.authType) }}
           </el-tag>
         </template>
@@ -23,16 +23,17 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog v-model="dialogVisible" :title="form.username ? '编辑用户' : '新增用户'" width="480px">
+    <el-dialog v-model="dialogVisible" :title="editMode ? '编辑用户' : '新增用户'" width="480px">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="80px">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="form.username" :disabled="editMode" />
+        <el-form-item label="用户名" prop="userName">
+          <el-input v-model="form.userName" :disabled="editMode" />
         </el-form-item>
         <el-form-item label="密码" :prop="editMode ? '' : 'password'">
           <el-input v-model="form.password" type="password" show-password :placeholder="editMode ? '不修改请留空' : ''" />
         </el-form-item>
         <el-form-item label="权限" prop="authType">
           <el-select v-model="form.authType" style="width:100%">
+            <el-option label="超级管理员" value="superadmin" />
             <el-option label="管理员" value="admin" />
             <el-option label="普通用户" value="user" />
             <el-option label="访客" value="guest" />
@@ -52,11 +53,11 @@ import { computed, onMounted } from 'vue'
 import { useCRUD } from '../composables/useCRUD'
 import { getUsers, createUser, updateUser, deleteUser } from '../api'
 
-const AUTH_LABELS = { admin: '管理员', user: '普通用户', guest: '访客' }
+const AUTH_LABELS = { superadmin: '超级管理员', admin: '管理员', user: '普通用户', guest: '访客' }
 const authTypeLabel = type => AUTH_LABELS[type] || type
 
 const rules = {
-  username: [{ required: true, message: '请输入用户名' }],
+  userName: [{ required: true, message: '请输入用户名' }],
   password: [{ required: true, message: '请输入密码' }],
   authType: [{ required: true, message: '请选择权限' }]
 }
@@ -66,12 +67,12 @@ const { list, loading, saving, dialogVisible, formRef, form, load, openDialog, h
   createFn: createUser,
   updateFn: updateUser,
   deleteFn: deleteUser,
-  getDeleteId: row => row.username,
-  getDeleteLabel: row => row.username,
+  getDeleteId: row => row.userName,
+  getDeleteLabel: row => row.userName,
   defaultForm: { authType: 'user' }
 })
 
-const editMode = computed(() => !!form.value.username && list.value.some(u => u.username === form.value.username))
+const editMode = computed(() => !!form.value.userName && list.value.some(u => u.userName === form.value.userName))
 
 onMounted(load)
 </script>

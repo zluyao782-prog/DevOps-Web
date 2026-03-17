@@ -29,7 +29,7 @@ request.interceptors.request.use(config => {
 })
 
 // token 过期或无效需要跳转登录的 errCode 集合
-const AUTH_ERROR_CODES = new Set([401, 403, 101002])
+const AUTH_ERROR_CODES = new Set([1002])
 
 function redirectToLogin() {
   localStorage.removeItem('token')
@@ -67,9 +67,11 @@ export const getUserInfo = () => request.get('/user_info')
 export const checkToken = () => request.get('/check_token')
 
 // User
-export const getUsers = () => request.get('/user')
-export const createUser = data => request.post('/user', data)
-export const updateUser = data => request.put('/user', data)
+export const getUsers = (params) => request.get('/user', { params })
+export const createUser = ({ userName, password, authType }) =>
+  request.post('/user', { username: userName, password: encryptPassword(password), authType })
+export const updateUser = ({ userName, password, authType }) =>
+  request.put('/user', { username: userName, authType, ...(password ? { password: encryptPassword(password) } : {}) })
 export const deleteUser = username => request.delete(`/user?username=${username}`)
 
 // Product
