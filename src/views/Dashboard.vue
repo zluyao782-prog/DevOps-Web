@@ -47,12 +47,7 @@ onMounted(async () => {
   try {
     sysInfo.value = await getSystemInfo()
   } catch (e) {
-    // 部分接口直接返回数据对象而非标准格式，从 catch 中取
-    if (e && typeof e === 'object' && !e.errCode) {
-      sysInfo.value = e
-    } else {
-      console.warn('获取系统信息失败', e)
-    }
+    console.warn('获取系统信息失败', e)
   }
 
   const [productCount, userCount, repoCount] = await Promise.all([

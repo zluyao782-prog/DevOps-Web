@@ -30,6 +30,7 @@ export function useCRUD({ fetchFn, createFn, updateFn, deleteFn, getDeleteId, ge
         : Array.isArray(res?.list) ? res.list
         : Array.isArray(res?.items) ? res.items
         : []
+      if (data.length > 0) console.log('[useCRUD] 数据样本:', JSON.stringify(data[0]))
       list.value = data
     } catch (e) {
       console.error('加载数据失败', e)
@@ -42,8 +43,8 @@ export function useCRUD({ fetchFn, createFn, updateFn, deleteFn, getDeleteId, ge
   function openDialog(row) {
     form.value = row ? { ...row } : { ...defaultForm }
     dialogVisible.value = true
-    // nextTick 后重置，避免 formRef 未挂载
-    setTimeout(() => formRef.value?.resetFields(), 0)
+    // 仅清除校验状态，不重置字段值（resetFields 会覆盖刚设置的 form.value）
+    setTimeout(() => formRef.value?.clearValidate(), 0)
   }
 
   async function handleSave() {

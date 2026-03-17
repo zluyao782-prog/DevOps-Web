@@ -101,7 +101,5 @@ export const getBranches = (owner, repo) => request.get(`/githubbranchs?owner=${
 export const getWorkflows = (owner, repo) => request.get(`/githubworkflows?owner=${owner}&repo=${repo}`)
 export const triggerWorkflow = data => request.post('/triggerworkflow', data)
 
-// System - 该接口直接返回数据，不走标准 errCode 结构
-export const getSystemInfo = () => axios.get('/api/system/info', {
-  headers: { 'x-auth-token': localStorage.getItem('token') || '' }
-}).then(res => res.data)
+// System
+export const getSystemInfo = () => request.get('/api/system/info')
