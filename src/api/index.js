@@ -2,14 +2,10 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import CryptoJS from 'crypto-js'
 
-// 从环境变量读取密钥，避免硬编码
-const AES_KEY = import.meta.env.VITE_AES_KEY || ''
+// 从环境变量读取密钥，fallback 到文档约定的固定密钥
+const AES_KEY = import.meta.env.VITE_AES_KEY || '3yWyRmUcIoGsAoL0'
 
 export function encryptPassword(password) {
-  if (!AES_KEY) {
-    console.warn('VITE_AES_KEY 未配置，密码将明文传输')
-    return password
-  }
   const key = CryptoJS.enc.Utf8.parse(AES_KEY.padEnd(16, '0').slice(0, 16))
   return CryptoJS.AES.encrypt(password, key, {
     mode: CryptoJS.mode.ECB,
@@ -81,7 +77,10 @@ export const updateProduct = data => request.put('/product', data)
 export const deleteProduct = id => request.delete(`/product?id=${id}`)
 
 // Version
-export const getVersions = productId => request.get(`/version?productId=${productId}`)
+export const getVersions = productId => {
+  if (!productId) return Promise.resolve({ data: [] })
+  return request.get(`/version?productId=${productId}`)
+}
 export const createVersion = data => request.post('/version', data)
 export const updateVersion = data => request.put('/version', data)
 export const deleteVersion = id => request.delete(`/version?id=${id}`)
