@@ -24,7 +24,6 @@ export function useCRUD({ fetchFn, createFn, updateFn, deleteFn, getDeleteId, ge
     loading.value = true
     try {
       const res = await fetchFn(params)
-      console.log('[useCRUD] 原始响应:', JSON.stringify(res))
       // 依次尝试常见的数组字段，最终兜底为空数组
       const data = Array.isArray(res) ? res
         : Array.isArray(res?.data) ? res.data
