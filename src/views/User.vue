@@ -62,7 +62,7 @@ const rules = {
 }
 
 const { list, loading, saving, dialogVisible, formRef, form, load, openDialog, handleSave, handleDelete } = useCRUD({
-  fetchFn: getUsers,
+  fetchFn: () => getUsers({ page: 1, pageSize: 100 }),
   createFn: createUser,
   updateFn: updateUser,
   deleteFn: deleteUser,

@@ -61,7 +61,7 @@ let userOptionsLoaded = false
 async function loadUserOptions() {
   if (userOptionsLoaded) return
   try {
-    const res = await getUsers({ pageSize: 1000 })
+    const res = await getUsers({ page: 1, pageSize: 1000 })
     const users = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : []
     userOptions.value = users.map(u => u.userName)
     userOptionsLoaded = true
