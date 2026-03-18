@@ -70,7 +70,7 @@ const rules = {
 }
 
 const { list, loading, saving, dialogVisible, formRef, form, load, openDialog, handleSave, handleDelete } = useCRUD({
-  fetchFn: () => selectedProduct.value ? getVersions(selectedProduct.value) : Promise.resolve([]),
+  fetchFn: () => selectedProduct.value ? getVersions(selectedProduct.value) : Promise.resolve({ data: [] }),
   createFn: createVersion,
   updateFn: updateVersion,
   deleteFn: deleteVersion,

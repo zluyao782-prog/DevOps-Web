@@ -12,7 +12,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
  * @param {Function} options.getDeleteLabel - 从 row 中获取删除确认文案
  * @param {Object} options.defaultForm - 新增时的默认表单值
  */
-export function useCRUD({ fetchFn, createFn, updateFn, deleteFn, getDeleteId, getDeleteLabel, defaultForm = {} }) {
+export function useCRUD({ fetchFn, createFn, updateFn, deleteFn, getDeleteId, getDeleteLabel, defaultForm = {}, isEdit }) {
   const list = ref([])
   const loading = ref(false)
   const saving = ref(false)
@@ -50,7 +50,7 @@ export function useCRUD({ fetchFn, createFn, updateFn, deleteFn, getDeleteId, ge
     await formRef.value.validate()
     saving.value = true
     try {
-      if (form.value.id) await updateFn(form.value)
+      if (isEdit ? isEdit(form.value) : form.value.id) await updateFn(form.value)
       else await createFn(form.value)
       ElMessage.success('保存成功')
       dialogVisible.value = false

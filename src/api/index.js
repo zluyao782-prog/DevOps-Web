@@ -13,7 +13,10 @@ export function encryptPassword(password) {
   }).toString()
 }
 
-const request = axios.create({ timeout: 15000 })
+const request = axios.create({
+  baseURL: '/api',
+  timeout: 15000
+})
 
 request.interceptors.request.use(config => {
   const token = localStorage.getItem('token')
@@ -68,38 +71,35 @@ export const createUser = ({ userName, password, authType }) =>
   request.post('/user', { username: userName, password: encryptPassword(password), authType })
 export const updateUser = ({ userName, password, authType }) =>
   request.put('/user', { username: userName, authType, ...(password ? { password: encryptPassword(password) } : {}) })
-export const deleteUser = username => request.delete(`/user?username=${username}`)
+export const deleteUser = username => request.delete('/user', { params: { username } })
 
 // Product
-export const getProducts = () => request.get('/product')
+export const getProducts = (params) => request.get('/product', { params })
 export const createProduct = data => request.post('/product', data)
 export const updateProduct = data => request.put('/product', data)
-export const deleteProduct = id => request.delete(`/product?id=${id}`)
+export const deleteProduct = id => request.delete('/product', { params: { id } })
 
 // Version
-export const getVersions = productId => {
-  if (!productId) return Promise.resolve({ data: [] })
-  return request.get(`/version?productId=${productId}`)
-}
+export const getVersions = (productId) => request.get('/version', { params: { productId } })
 export const createVersion = data => request.post('/version', data)
 export const updateVersion = data => request.put('/version', data)
-export const deleteVersion = id => request.delete(`/version?id=${id}`)
+export const deleteVersion = id => request.delete('/version', { params: { id } })
 
 // Artifact Repository
 export const getRepositories = () => request.get('/artifact_repository')
 export const createRepository = data => request.post('/artifact_repository', data)
 export const updateRepository = data => request.put('/artifact_repository', data)
-export const deleteRepository = id => request.delete(`/artifact_repository?id=${id}`)
+export const deleteRepository = id => request.delete('/artifact_repository', { params: { id } })
 
 // Artifact Category
 export const getCategories = () => request.get('/artifact_category')
 export const createCategory = data => request.post('/artifact_category', data)
 export const updateCategory = data => request.put('/artifact_category', data)
-export const deleteCategory = id => request.delete(`/artifact_category?id=${id}`)
+export const deleteCategory = id => request.delete('/artifact_category', { params: { id } })
 
 // CI/CD
-export const getBranches = (owner, repo) => request.get(`/githubbranchs?owner=${owner}&repo=${repo}`)
-export const getWorkflows = (owner, repo) => request.get(`/githubworkflows?owner=${owner}&repo=${repo}`)
+export const getBranches = (owner, repo) => request.get('/githubbranchs', { params: { owner, repo } })
+export const getWorkflows = (owner, repo) => request.get('/githubworkflows', { params: { owner, repo } })
 export const triggerWorkflow = data => request.post('/triggerworkflow', data)
 
 // System

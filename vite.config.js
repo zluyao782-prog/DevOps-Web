@@ -21,8 +21,14 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: Object.fromEntries(
         ['/api', '/login', '/logout', '/user', '/product', '/version',
-          '/artifact_repository', '/artifact_category', '/githubbranchs',
-          '/githubworkflows', '/triggerworkflow', '/user_info', '/check_token', '/token'
+          '/artifact_repository', '/artifact_category', '/artifact_subrepository',
+          '/artifact_upload', '/artifact_apt_subrepo_details', '/artifact_docker_image_tags',
+          '/githubbranchs', '/githubworkflows', '/githubactions',
+          '/triggerworkflow', '/getactionsbyworkflowname', '/getworkflowinputinfobyname',
+          '/CIArtifacts', '/webhook',
+          '/user_info', '/check_token', '/token', '/auth',
+          '/product_name', '/product_doc', '/version_name', '/version_artifacts',
+          '/health', '/ready'
         ].map(path => [path, { target: apiBase, changeOrigin: true }])
       )
     }
