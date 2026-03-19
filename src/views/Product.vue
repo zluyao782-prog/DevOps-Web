@@ -64,7 +64,7 @@ async function loadUserOptions() {
     const res = await getUsers({ page: 1, pageSize: 1000 })
     const users = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : []
     userOptions.value = users.map(u => u.userName)
-    userOptionsLoaded = true
+    if (userOptions.value.length > 0) userOptionsLoaded = true
   } catch (e) {
     console.error('加载用户列表失败', e)
   }

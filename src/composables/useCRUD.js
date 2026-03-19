@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 /**
@@ -43,7 +43,7 @@ export function useCRUD({ fetchFn, createFn, updateFn, deleteFn, getDeleteId, ge
     form.value = row ? { ...row } : { ...defaultForm }
     dialogVisible.value = true
     // 仅清除校验状态，不重置字段值（resetFields 会覆盖刚设置的 form.value）
-    setTimeout(() => formRef.value?.clearValidate(), 0)
+    nextTick(() => formRef.value?.clearValidate())
   }
 
   async function handleSave() {
