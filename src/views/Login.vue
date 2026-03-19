@@ -41,9 +41,7 @@ async function handleLogin() {
   }
   loading.value = true
   try {
-    console.log('开始登录, username:', form.value.username)
     await auth.login(form.value.username, form.value.password)
-    console.log('登录成功, token:', localStorage.getItem('token'))
     router.push('/')
   } catch (e) {
     console.error('登录失败详情:', e)

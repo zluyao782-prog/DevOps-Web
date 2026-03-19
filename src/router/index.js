@@ -25,11 +25,23 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, _from, next) => {
-  const token = localStorage.getItem('token')
-  if (to.meta.requiresAuth && !token) {
+router.beforeEach(async (to, _from, next) => {
+  // 动态导入避免循环依赖
+  const { useAuthStore } = await import('../stores/auth')
+  const { getActivePinia } = await import('pinia')
+  const pinia = getActivePinia()
+  if (!pinia) return next()
+
+  const auth = useAuthStore(pinia)
+
+  // 首次访问时尝试通过 cookie 恢复登录状态
+  if (!auth.loggedIn && to.meta.requiresAuth) {
+    await auth.initAuth()
+  }
+
+  if (to.meta.requiresAuth && !auth.loggedIn) {
     next('/login')
-  } else if (to.path === '/login' && token) {
+  } else if (to.path === '/login' && auth.loggedIn) {
     next('/')
   } else {
     next()

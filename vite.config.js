@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd())
@@ -7,6 +8,11 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [vue()],
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url))
+      }
+    },
     build: {
       rollupOptions: {
         output: {
@@ -19,18 +25,14 @@ export default defineConfig(({ mode }) => {
       }
     },
     server: {
-      proxy: Object.fromEntries(
-        ['/api', '/login', '/logout', '/user', '/product', '/version',
-          '/artifact_repository', '/artifact_category', '/artifact_subrepository',
-          '/artifact_upload', '/artifact_apt_subrepo_details', '/artifact_docker_image_tags',
-          '/githubbranchs', '/githubworkflows', '/githubactions',
-          '/triggerworkflow', '/getactionsbyworkflowname', '/getworkflowinputinfobyname',
-          '/CIArtifacts', '/webhook',
-          '/user_info', '/check_token', '/token', '/auth',
-          '/product_name', '/product_doc', '/version_name', '/version_artifacts',
-          '/health', '/ready'
-        ].map(path => [path, { target: apiBase, changeOrigin: true }])
-      )
+      proxy: {
+        // 所有 /api/* 请求去掉前缀后转发到后端
+        '/api': {
+          target: apiBase,
+          changeOrigin: true,
+          rewrite: path => path.replace(/^\/api/, '')
+        }
+      }
     }
   }
 })
